@@ -1,0 +1,103 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. GLOBAL SAFETY NET (DEFAULT-DENY CATCH-ALL)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. HELPER FUNCTIONS
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Validation Client
+    function isValidClient(data) {
+      return data.id is string && data.id.size() <= 128 &&
+        (!('nom' in data) || (data.nom is string && data.nom.size() <= 200)) &&
+        (!('prenom' in data) || (data.prenom is string && data.prenom.size() <= 200));
+    }
+
+    // Validation Auto-Entrepreneur
+    function isValidAutoEntrepreneur(data) {
+      return data.id is string && data.id.size() <= 128 &&
+        (!('nom' in data) || (data.nom is string && data.nom.size() <= 200)) &&
+        (!('prenom' in data) || (data.prenom is string && data.prenom.size() <= 200));
+    }
+
+    // Validation Employé
+    function isValidEmployee(data) {
+      return data.id is string && data.id.size() <= 128 &&
+        (!('nom' in data) || (data.nom is string && data.nom.size() <= 200)) &&
+        (!('prenom' in data) || (data.prenom is string && data.prenom.size() <= 200));
+    }
+
+    // Validation Log d'Activité
+    function isValidActivityLog(data) {
+      return data.id is string && data.id.size() <= 128 &&
+        (!('clientId' in data) || (data.clientId is string && data.clientId.size() <= 128));
+    }
+
+    // Validation Rendez-vous
+    function isValidAppointment(data) {
+      return data.id is string && data.id.size() <= 128 &&
+        (!('nom' in data) || (data.nom is string && data.nom.size() <= 200));
+    }
+
+    // 3. COLLECTION RULES
+
+    // Ping / Test de connexion pour initialisation SDK
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+
+    // Paramètres Système & Sécurité Multi-PC (mot de passe opérations, tombstones de suppression, tarifs, employeur)
+    match /systemSettings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isValidId(settingId);
+    }
+
+    // Clients & Dossiers SERVI-DOX (Synchronisation universelle cloud multi-ordinateurs)
+    match /clients/{clientId} {
+      allow read: if true;
+      allow create, update: if isValidId(clientId) && isValidClient(request.resource.data);
+      allow delete: if isValidId(clientId);
+    }
+
+    // Dossiers Auto-Entrepreneurs
+    match /autoEntrepreneurs/{dossierId} {
+      allow read: if true;
+      allow create, update: if isValidId(dossierId) && isValidAutoEntrepreneur(request.resource.data);
+      allow delete: if isValidId(dossierId);
+    }
+
+    // Employés et Paie
+    match /employees/{employeeId} {
+      allow read: if true;
+      allow create, update: if isValidId(employeeId) && isValidEmployee(request.resource.data);
+      allow delete: if isValidId(employeeId);
+    }
+
+    // Journal d'Activité
+    match /activityLogs/{logId} {
+      allow read: if true;
+      allow create, update: if isValidId(logId) && isValidActivityLog(request.resource.data);
+      allow delete: if isValidId(logId);
+    }
+
+    // Profils Utilisateurs & Sessions
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update, delete: if isValidId(userId);
+    }
+
+    // Demandes de Rendez-vous (Réservation publique par le client, gestion par l'équipe)
+    match /appointments/{appointmentId} {
+      allow read: if true;
+      allow create, update: if isValidId(appointmentId) && isValidAppointment(request.resource.data);
+      allow delete: if isValidId(appointmentId);
+    }
+  }
+}
