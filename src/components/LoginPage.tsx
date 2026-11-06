@@ -37,7 +37,6 @@ import {
 } from 'lucide-react';
 import { InteractiveCloudBackground } from './InteractiveCloudBackground';
 import { AppointmentBookingModal } from './AppointmentBookingModal';
-import { MovingServicesShowcase } from './MovingServicesShowcase';
 
 export const LoginPage: React.FC = () => {
   const { login, register, loginWithGoogle, resetPassword } = useAuth();
@@ -472,20 +471,6 @@ export const LoginPage: React.FC = () => {
             </span>{' '}
             votre allié administratif en Algérie
           </h1>
-
-          <p className="text-xs sm:text-base text-slate-300 leading-relaxed">
-            Création de sociétés SARL/EURL, domiciliation commerciale 6 mois & 1 an, espace coworking ultra-équipé, école de langues, fiscalité auto-entrepreneur et assistance sur-mesure pour les résidents et la diaspora.
-          </p>
-
-          {/* DYNAMIC MOVING SERVICES CAROUSEL ("Pages qui bougent") */}
-          <div className="pt-1 text-left w-full max-w-full overflow-hidden">
-            <MovingServicesShowcase
-              onSelectService={(motif) => {
-                setBookingDefaultMotif(motif);
-                setIsBookingModalOpen(true);
-              }}
-            />
-          </div>
 
           {/* Quick Access Buttons for Services & Contact — Grandes zones tactiles sur mobile */}
           <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-2">
